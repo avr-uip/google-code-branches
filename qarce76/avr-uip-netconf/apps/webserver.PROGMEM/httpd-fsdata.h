@@ -38,11 +38,17 @@
 #include <avr/pgmspace.h>
 #include "uip.h"
 
+// needed for the encoding support
+#include "httpd-cgi-conf.h"
+
 struct httpd_fsdata_file {
   const struct httpd_fsdata_file *next;
   const PGM_P name;
   const PGM_P data;
   const int len;
+#ifdef HTTPD_FS_ENCODING
+  const uint8_t encoding;
+#endif
 #ifdef HTTPD_FS_STATISTICS
 #if HTTPD_FS_STATISTICS == 1
   u16_t count;
@@ -55,6 +61,9 @@ struct httpd_fsdata_file_noconst {
   char *name;
   char *data;
   int len;
+#ifdef HTTPD_FS_ENCODING
+  uint8_t encoding;
+#endif
 #ifdef HTTPD_FS_STATISTICS
 #if HTTPD_FS_STATISTICS == 1
   u16_t count;

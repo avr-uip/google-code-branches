@@ -2,6 +2,8 @@
 
 $httpd_fs_dir = "httpd-fs";
 %cgi_names;   # a list of cgi function names
+$doGZIP = 0;
+%gzip_names;
 
 open(OUTPUT, "> httpd-fsdata.c");
 
@@ -34,13 +36,36 @@ foreach $file (@files) {
 
 print(OUTPUT "#include <avr/pgmspace.h>\n");
 
+# check if there are any "_gz" files
+# these will be gziped and have an encoding type set
 foreach $file (@files) {
     if(-f $file) {
+        if ($file =~ /_gz$/)
+		{
+			$doGZIP = 1;
+			print ("Found _gz suffix on a file.  Turning on gzip encoding support\n");
+		}
+	}
+}
+
+foreach $file (@files) {
+	$thisGZIP = 0;
+    if(-f $file) {
     $file_name = "$file";
-	
+
+    if($doGZIP && $file =~ /_gz$/)
+	{
+		`gzip --to-stdout $file  > $file.gz `;
+	    open(FILE, "$file.gz") || die "Could not open file $file\n";
+		$file =~ s/_gz//g;  # remove the suffix from the file name
+		$thisGZIP = 1;
+	}
+	else
+	{
+	    open(FILE, $file) || die "Could not open file $file\n";
+    }
+
 	print "Adding file $file\n";
-	
-	open(FILE, $file) || die "Could not open file $file\n";
 
 	$file =~ s-^-/-;
 	$fvar = $file;
@@ -73,7 +98,7 @@ foreach $file (@files) {
 	push(@pfiles, $file);
     }
 	# open the file and search for cgi functions
-    open(FILE, $file_name) || die "Could not open file $file\n";
+    open(FILE, $file_name) || die "Could not open file $file_name\n";
     while(<FILE>)
     {
         if( $_ =~ m/%!\s+(\S+)/ )
@@ -82,6 +107,12 @@ foreach $file (@files) {
         }
     }
     close(FILE);
+
+    if($thisGZIP)
+	{
+		`rm $file_name.gz`;
+	}
+	$gzip_name{$file} = $thisGZIP;
 
 }
 
@@ -96,7 +127,12 @@ for($i = 0; $i < @fvars; $i++) {
     }
     print(OUTPUT "const struct httpd_fsdata_file file".$fvar."[] = {{$prevfile, data$fvar, ");
     print(OUTPUT "data$fvar + ". (length($file) + 1) .", ");
-    print(OUTPUT "(int) sizeof(data$fvar) - ". (length($file) + 1) ."}};\n\n");
+    print(OUTPUT "(int) sizeof(data$fvar) - ". (length($file) + 1) );
+	if($doGZIP)
+	{
+		print(OUTPUT ", " . $gzip_name{$file});
+	}
+	print(OUTPUT "}};\n\n");
 }
 
 print(OUTPUT "#define HTTPD_FS_ROOT file$fvars[$i - 1]\n\n");
@@ -120,5 +156,10 @@ foreach $akey (keys %cgi_names)
     }
     print(OUTPUT "#define ENABLE_CGI_$akey $orig_akey\n");
     print(OUTPUT "#define ENABLE_CGI_" . $akey . "_LIST &" . $orig_akey . ",\n\n");
+}
+
+if($doGZIP)
+{
+	print(OUTPUT "#define HTTPD_FS_ENCODING 1");
 }
 close(OUTPUT);

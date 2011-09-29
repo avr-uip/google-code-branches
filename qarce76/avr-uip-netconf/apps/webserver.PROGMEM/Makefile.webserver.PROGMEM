@@ -20,6 +20,7 @@ endif
 
 HTTPD_DIR=$(strip ${APPSDIR}/webserver.PROGMEM)
 
+## is the following an issue for windows users?
 all ::
 	cd ${HTTPD_DIR} && perl makefsdata ${HTTPD_FS_DIR}
 

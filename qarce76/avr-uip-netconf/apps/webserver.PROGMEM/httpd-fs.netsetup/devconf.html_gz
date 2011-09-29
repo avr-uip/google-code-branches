@@ -1,0 +1,170 @@
+<html>
+
+<body onload="doPage();">
+
+<script type="text/javascript">
+  function doConfig() {
+	//doDevInfo("MANUFACTURER", "PRODUCT NAME", "PRODUCT VERSION", "SERIAL NUMBER", "MAC ADDRESS");
+    //doNetSet(0,"192.168.2.88", "255.255.255.0", "192.168.2.1");
+    //doNTPset();
+    //doUserSet();
+  }
+</script>
+
+<script type="text/javascript">
+
+// return the value of the radio button that is checked
+// return an empty string if none are checked, or
+// there are no radio buttons
+function getCheckedValue(radioObj) {
+	if(!radioObj)
+		return "";
+	var radioLength = radioObj.length;
+	if(radioLength == undefined)
+		if(radioObj.checked)
+			return radioObj.value;
+		else
+			return "";
+	for(var i = 0; i < radioLength; i++) {
+		if(radioObj[i].checked) {
+			return radioObj[i].value;
+		}
+	}
+	return "";
+}
+
+// set the radio button with the given value as being checked
+// do nothing if there are no radio buttons
+// if the given value does not exist, all the radio buttons
+// are reset to unchecked
+function setCheckedValue(radioObj, newValue) {
+	if(!radioObj)
+		return;
+	var radioLength = radioObj.length;
+	if(radioLength == undefined) {
+		radioObj.checked = (radioObj.value == newValue.toString());
+		return;
+	}
+	for(var i = 0; i < radioLength; i++) {
+		radioObj[i].checked = false;
+		if(radioObj[i].value == newValue.toString()) {
+			radioObj[i].checked = true;
+		}
+	}
+}
+
+    function toggle_visibility(id) {
+       var e = document.getElementById(id);
+       if(e.style.display == 'block')
+          e.style.display = 'none';
+       else
+          e.style.display = 'block';
+    }
+
+  function setVisible(visID, newValue) {
+    var e = document.getElementById(visID);
+	alert("about to set to $newValue");
+    e.style.display = newValue;
+  }
+
+  function include(filename) {
+    var head = document.getElementsByTagName('head')[0];
+
+    script = document.createElement('script');
+    script.src = filename;
+    script.type = 'text/javascript';
+
+    head.appendChild(script)
+  }
+</script>
+
+<SCRIPT TYPE="text/javascript">
+
+  function doDHCP() {
+
+    document.netset.devip.disabled = true;
+    document.netset.devnm.disabled = true;
+    document.netset.devgw.disabled = true;
+  }
+  
+  function doStatic() {
+    document.netset.devip.disabled = false;
+    document.netset.devnm.disabled = false;
+    document.netset.devgw.disabled = false;
+  }
+  
+  function doNetSet(isStatic, setIP, setNM, setGW) {
+      if (isStatic) {
+        doStatic();
+        setCheckedValue(document.netset.netmode, "static");        
+      } else {
+        doDHCP();
+        setCheckedValue(document.netset.netmode, "dhcp");
+      }
+      document.netset.devip.value = setIP;
+      document.netset.devnm.value = setNM;
+      document.netset.devgw.value = setGW;
+//      setVisible('divnet', 'block');
+      setVisible('nosupport','none');
+  }
+  //doDevInfo("MANUFACTURER", "PRODUCT NAME", "PRODUCT VERSION", "SERIAL NUMBER", "MAC ADDRESS");
+  function doDevInfo(manu, prodName, prodVer, ser, mac) {
+
+//      setVisible('divinfo', 'block');
+      setVisible('nosupport','none');
+  }
+
+  function doPage() {
+    setVisible('nosupport','block');
+    setVisible('divinfo', 'none');
+    setVisible('divnet','none');
+	//include('devconf.js');
+    doConfig();
+  }
+  
+</script>
+
+
+<div id='devinfo'>
+  <br>Device Information:
+  <table cellpadding=0 cellspacing=0 name="info">
+    <tr>
+	  <td>Manufacturer:</td> <td><input type="text" name="manu" disabled></td>
+	</tr>
+    <tr>
+	  <td>Product Name:</td> <td><input type="text" name="prodName" disabled></td>
+	</tr>
+    <tr>
+	  <td>Product Version:</td> <td><input type="text" name="prodVer" disabled></td>
+	</tr>
+    <tr>
+	  <td>Serial Number:</td> <td><input type="text" name="ser" disabled></td>
+	</tr>
+    <tr>
+	  <td>MAC Address:</td> <td><input type="text" name="mac" disabled></td>
+	</tr>
+  </table>
+</div>
+
+<div id='divnet' >
+  <br>Network Settings:
+  <form name="netset"  action="devconf.shtml" method="get">
+    IP Mode:
+    <input type="radio" name="netmode" value="dhcp" onchange="doDHCP();" /> DHCP
+    <input type="radio" name="netmode" value="static" onchange="doStatic();" /> Static
+   
+    <br/>IP Address:<input type="text" name="devip" size="30" maxlength="15" id="devip" disabled>
+    <br/>Net Mask:  <input type="text" name="devnm" size="30" maxlength="15" id="devnm" disabled>
+    <br/>Gateway:   <input type="text" name="devgw" size="30" maxlength="15" id="devgw" disabled>
+  
+    <br/><input type="submit" value="Apply Settings" />
+  </form>
+</div>
+
+<div id='nosupport' >
+  <p>There seems to be an issue loading the configuration from the device.
+  <p>I can't show you a configuration page because, the data would not be valid.
+</div>
+
+</body>
+</html>
