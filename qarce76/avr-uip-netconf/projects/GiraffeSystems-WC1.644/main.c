@@ -6,9 +6,8 @@
 
 #include "timer.h"
 
-//#include "usart.h"
-
-#include "global-conf.h"
+#include "usart.h"
+//#include "global-conf.h"
 #include "uip_arp.h"
 #include "network.h"
 #include "enc28j60.h"
@@ -94,12 +93,13 @@ int main(void)
         my_eth_addr.addr[5] = _eth_addr[5];
     }
 
+	network_set_MAC(_eth_addr);
 	uip_setethaddr(my_eth_addr);
 //_enable_dhcp = 1;
     if (_enable_dhcp)
     {
         // setup the dhcp renew timer the make the first request
-        timer_set(&dhcp_timer, CLOCK_SECOND * 600);
+        timer_set(&dhcp_timer, CLOCK_SECOND * 3600);
 	    dhcpc_init(&my_eth_addr, 6);
         dhcpc_request();
     }
@@ -129,16 +129,15 @@ int main(void)
             uip_setnetmask(ipaddr);
         }
     }
-/*	
-	USART_init(CONSOLE_SPEED_9600);
 
-	USART_transmit('A');
-	USART_transmit('B');
-	USART_transmit('C');
-	USART_transmit('D');
+USART_init(CONSOLE_SPEED_9600);
 
-	sendString("Hello out there\n\r");
-*/
+USART_transmit('A');
+USART_transmit('B');
+USART_transmit('C');
+USART_transmit('D');
+
+sendString("Hello out there\n\r");
 
     // start up the webserver
     httpd_init();
@@ -148,6 +147,7 @@ int main(void)
 
 	while(1){
 		uip_len = network_read();
+
 
 		if(uip_len > 0) {
 			if(BUF->type == htons(UIP_ETHTYPE_IP)){
@@ -192,10 +192,11 @@ int main(void)
 			}
 		} else if (_enable_dhcp && timer_expired(&dhcp_timer)) {
             // for now turn off the led when we start the dhcp process
-            led_low();
+            //led_low();
             dhcpc_renew();
             timer_reset(&dhcp_timer);
         }
+/// 		while(network_sending()) {asm("nop");}; //wait untill packet is sent away
 	}
 	return 0;
 }
@@ -203,6 +204,7 @@ int main(void)
 #if UIP_CONF_LOGGING == 1
 void uip_log(char *m)
 {
+	sendString(m);
 	//TODO: Get debug information out here somehow, does anybody know a smart way to do that?
 }
 #endif

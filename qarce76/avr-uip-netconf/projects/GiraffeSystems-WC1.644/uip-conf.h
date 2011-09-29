@@ -46,7 +46,7 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
-#define UIP_CONF_MAX_LISTENPORTS 1
+#define UIP_CONF_MAX_LISTENPORTS 2
 
 /**
  * uIP buffer size.
@@ -56,7 +56,7 @@ typedef unsigned short uip_stats_t;
  * DHCP with my Netgear router needs 590 bytes for the UDP packet
  * rounding up to 600 isn't bad.
  */
-#define UIP_CONF_BUFFER_SIZE     600
+#define UIP_CONF_BUFFER_SIZE     610
 /**
  * CPU byte order.
  *
@@ -69,7 +69,7 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
-#define UIP_CONF_LOGGING         0
+#define UIP_CONF_LOGGING         1
 
 /**
  * UDP support on or off
@@ -90,7 +90,7 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
-#define UIP_CONF_STATISTICS      1
+#define UIP_CONF_STATISTICS      0
 
 /**
  * Broadcast support.
