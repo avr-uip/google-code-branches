@@ -31,6 +31,11 @@
  * $Id: shell.c,v 1.1 2006/06/07 09:43:54 adam Exp $
  *
  */
+#include "global-conf.h"
+
+#if TELNETD_TIME_CMD
+#include "ds1302.h"
+#endif
 
 #include "shell.h"
 
@@ -41,7 +46,9 @@ struct ptentry {
   void (* pfunc)(char *str);
 };
 
+#ifndef SHELL_PROMPT
 #define SHELL_PROMPT "uIP 1.0> "
+#endif
 
 /*---------------------------------------------------------------------------*/
 static void
@@ -72,11 +79,45 @@ inttostr(register char *str, unsigned int i)
   str[3] = ' ';
   str[4] = 0;
 }
+static void
+settime(char *str)
+{
+	uint8_t timestore_write[8] = {0x00,0x38,0x10,0x10,0x11,0x04,0x10,0};
+	send_time_to_rtc(timestore_write);
+	shell_output("time set", "");
+}
+/*---------------------------------------------------------------------------*/
+static void
+isotime(char *str)
+{
+  uint8_t timestore_read[7];
+  uint8_t iso_timestore[16];
+
+  read_time(timestore_read);
+  iso_time(timestore_read, iso_timestore);
+/*  iso_timestore[0] = 'a' + timestore_read[0];
+  iso_timestore[1] = 'a' + timestore_read[1];
+  iso_timestore[2] = 'a' + timestore_read[2];
+  iso_timestore[3] = 'a' + timestore_read[3];
+  iso_timestore[4] = '\0';
+*/
+  shell_output(iso_timestore, "");
+}
 /*---------------------------------------------------------------------------*/
 static void
 help(char *str)
 {
   shell_output("Available commands:", "");
+#ifdef TELNETD_TIME_CMD
+  shell_output("isotime - show the current system time in iso format", "");
+  shell_output("settime - set the current system time", "");
+  shell_output("gettime - get the current system time", "");
+  shell_output("rtcisotime - show the current RTC time in iso format", "");
+  shell_output("rtcsettime - set the current RTC time", "");
+  shell_output("rtcgettime - set the current RTC time", "");
+  shell_output("rtctosys   - copy the RTC time to the system time", "");
+  shell_output("systortc   - copy the system time to the RTC chip", "");
+#endif
   shell_output("stats   - show network statistics", "");
   shell_output("conn    - show TCP connections", "");
   shell_output("help, ? - show help", "");
@@ -88,6 +129,7 @@ unknown(char *str)
 {
   if(strlen(str) > 0) {
     shell_output("Unknown command: ", str);
+	*str = 0;
   }
 }
 /*---------------------------------------------------------------------------*/
@@ -97,6 +139,10 @@ static struct ptentry parsetab[] =
    {"help", help},
    {"exit", shell_quit},
    {"?", help},
+#ifdef TELNETD_TIME_CMD
+   {"time", isotime},
+   {"settime", settime},
+#endif
 
    /* Default action */
    {NULL, unknown}};
