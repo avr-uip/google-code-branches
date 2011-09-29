@@ -1,0 +1,3 @@
+APP_SOURCES += water_timer.c
+
+LIBS += eeprom
