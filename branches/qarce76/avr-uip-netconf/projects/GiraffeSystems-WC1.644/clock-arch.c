@@ -40,3 +40,10 @@ clock_time_t clock_time(){
 
 	return time;
 }
+
+//set time
+void clock_set_time(clock_time_t to_time){
+	cli();
+	clock_datetime = to_time;
+	sei();
+}
