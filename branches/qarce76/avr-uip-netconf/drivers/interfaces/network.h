@@ -9,7 +9,7 @@
 void network_init(void);
 
 /*Read from the network, returns number of read bytes*/
-unsigned int network_read(void);
+uint16_t network_read(void);
 
 /*Send using the network*/
 void network_send(void);
@@ -19,5 +19,7 @@ void network_set_MAC(uint8_t* mac);
 
 /*Gets the MAC address of the device*/
 void network_get_MAC(uint8_t* mac);
+
+uint8_t network_sending(void);
 
 #endif /* __NETWORK_H__ */
