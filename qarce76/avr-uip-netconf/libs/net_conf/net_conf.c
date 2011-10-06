@@ -199,12 +199,12 @@ uint8_t net_conf_set_nm_string (char *nm_string)
 }
 
 
-uint8_t net_conf_get_mac (void)
+uint8_t *net_conf_get_mac (void)
 {
     return net_conf_eth_addr;
 }
 
-void net_conf_set_mac (uint8_t new_eth_addr)
+void net_conf_set_mac (uint8_t *new_eth_addr)
 {
 	memcpy(net_conf_eth_addr, new_eth_addr, 6);
 }
@@ -226,12 +226,12 @@ void net_conf_set_dhcpc(uint8_t mode)
 
 // is the system in dhcp mode
 // 0 == no, 1 == true
-uint8_t net_conf_is_dhcpc()
+uint8_t net_conf_is_dhcpc(void)
 {
     return (net_conf_enable_dhcp);
 }
 
-void net_conf_store()
+void net_conf_store(void)
 {
 // update functions write if data is different
 #if defined(eeprom_update_block)
