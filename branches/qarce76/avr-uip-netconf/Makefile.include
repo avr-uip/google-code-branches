@@ -105,6 +105,13 @@ else
 	avr-size -C --mcu=$(MCU) $(OBJECTDIR)/$(NAME).out
 endif
 
+eeprom :: $(NAME).out
+	$(OBJCOPY) -j .eeprom --change-section-lma .eeprom=0 -O binary $(OBJECTDIR)/$(NAME).out  $(OBJECTDIR)/$(NAME).eeprom
+	
+
+loadeeprom :: eeprom
+	avrdude -V -p $(CHIP) -c $(PROGRAMMER) -B 2 -U eeprom:w:$(OBJECTDIR)/$(NAME).eeprom:r	
+
 #Loads without verifying
 load:: $(NAME).hex
 	set -x
