@@ -136,6 +136,7 @@ uint8_t network_string_to_byte_array(char *net_string,
 {
     char *to_convert = net_string;
 	char *walk;
+	char *the_end;
 	uint8_t bindex = 0;
     uint8_t base = 10;
 
@@ -144,12 +145,14 @@ uint8_t network_string_to_byte_array(char *net_string,
         if ((*walk == '.') || ((*walk == ':') && (base = 16)))
 		{
 			*walk = '\0';
-            byte_array[bindex] = (uint8_t) strtol(to_convert, NULL, base);
+            byte_array[bindex] = (uint8_t) strtol(to_convert, &the_end, base);
 			bindex++;
 			to_convert = walk+1;
 
+			// if nothing was converted to a value
 			// if the index is == to the length we are one byte over the array
-			if (bindex == byte_array_len)
+			if (the_end == to_convert) ||
+				(bindex == byte_array_len)
 			{
 				// return an error
                 return (1);
