@@ -6,6 +6,7 @@
 //#include "smtp.h"
 //#include "hello-world.h"
 //#include "simple-httpd.h"
+#define NETWORK_CMD 1
 #include "telnetd.h"
 //#include "webserver.h"
 //#include "dhcpc.h"

@@ -16,6 +16,20 @@
 
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
 
+#ifdef PORTB1
+//Led on tuxgraphics board
+#define led_conf()      DDRB |= (1<<DDB1)
+#define led_low()       PORTB |= (1<<PORTB1)
+#define led_high()      PORTB &= ~(1<<PORTB1)
+#define led_blink()     PORTB ^= (1<<PORTB1)
+#else
+//Led on tuxgraphics board
+#define led_conf()      DDRB |= (1<<DDB1)
+#define led_low()       PORTB |= (1<<PB1)
+#define led_high()      PORTB &= ~(1<<PB1)
+#define led_blink()     PORTB ^= (1<<PB1)
+#endif
+
 
 
 //EEPROM parameters (TCP/IP parameters)
