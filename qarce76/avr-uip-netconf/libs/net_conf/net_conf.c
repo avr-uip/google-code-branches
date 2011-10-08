@@ -10,6 +10,19 @@
 #include "uip_arp.h"
 #include <network.h>
 
+#ifdef PORTB1
+//Led on tuxgraphics board
+#define led_conf()      DDRB |= (1<<DDB1)
+#define led_low()       PORTB |= (1<<PORTB1)
+#define led_high()      PORTB &= ~(1<<PORTB1)
+#define led_blink()     PORTB ^= (1<<PORTB1)
+#else
+//Led on tuxgraphics board
+#define led_conf()      DDRB |= (1<<DDB1)
+#define led_low()       PORTB |= (1<<PB1)
+#define led_high()      PORTB &= ~(1<<PB1)
+#define led_blink()     PORTB ^= (1<<PB1)
+#endif
 
 
 //EEPROM parameters (TCP/IP parameters)
@@ -42,21 +55,24 @@ static struct uip_eth_addr  my_eth_addr = { .addr = {UIP_ETHADDR0,UIP_ETHADDR1,
 int net_conf_init(void)
 {
 	uip_ipaddr_t ipaddr;
+led_conf();
+led_low();
+	net_conf_load();
 
-    net_conf_enable_dhcp=eeprom_read_byte(&ee_enable_dhcp);
+// debug
+net_conf_enable_dhcp = 0;
 
     if ((net_conf_enable_dhcp != 1) &&
 		(net_conf_enable_dhcp != 0))
     {   // if the setting is invalid, enable by default
+#if UIP_CONF_BROADCAST == 1
         net_conf_enable_dhcp = 1;
-#if defined(eeprom_update_block)
-        eeprom_update_byte(&ee_enable_dhcp,net_conf_enable_dhcp);
 #else
-        eeprom_write_byte(&ee_enable_dhcp,net_conf_enable_dhcp);
+		net_conf_enable_dhcp = 0;
 #endif
+		// update the eeprom with the correct data
+		net_conf_save();
     }
-
-    eeprom_read_block ((void *)net_conf_eth_addr, (const void *)&ee_eth_addr,6);
 
     // if the mac address in eeprom looks good, use it.
     if((net_conf_eth_addr[0] != 255) && (net_conf_eth_addr[0] != 0))
@@ -69,18 +85,12 @@ int net_conf_init(void)
         my_eth_addr.addr[5] = net_conf_eth_addr[5];
     }
 
-	network_set_MAC(net_conf_eth_addr);
+// this is broken for the moment... 
+//	network_set_MAC(net_conf_eth_addr);
 	uip_setethaddr(my_eth_addr);
 
     if (!net_conf_enable_dhcp)
     {
-        eeprom_read_block ((void *)net_conf_ip_addr,
-		                   (const void *)&ee_ip_addr,4);
-        eeprom_read_block ((void *)net_conf_net_mask,
-		                   (const void *)&ee_net_mask,4);
-        eeprom_read_block ((void *)net_conf_gateway,
-		                   (const void *)&ee_gateway,4);
-
         // if the IP looks good in flash, use it
         if ((net_conf_ip_addr[0] != 255) &&
 			(net_conf_ip_addr[0] != 0))
@@ -96,7 +106,8 @@ int net_conf_init(void)
             uip_setnetmask(ipaddr);
         }
         else
-        { // ip in flash didn't look good... use default
+        {
+			// ip in flash didn't look good... use default
             uip_ipaddr(ipaddr, UIP_IPADDR0, UIP_IPADDR1,
 			                   UIP_IPADDR2, UIP_IPADDR3);
             uip_sethostaddr(ipaddr);
@@ -106,6 +117,9 @@ int net_conf_init(void)
             uip_ipaddr(ipaddr, UIP_NETMASK0, UIP_NETMASK1,
 			                   UIP_NETMASK2, UIP_NETMASK3);
             uip_setnetmask(ipaddr);
+
+			// update the eeprom with the correct data
+			net_conf_save();
         }
     }
 
@@ -231,7 +245,7 @@ uint8_t net_conf_is_dhcpc(void)
     return (net_conf_enable_dhcp);
 }
 
-void net_conf_store(void)
+void net_conf_save(void)
 {
 // update functions write if data is different
 #if defined(eeprom_update_block)
@@ -246,4 +260,24 @@ void net_conf_store(void)
     eeprom_write_block ((const void *)net_conf_gateway, (void *)&ee_gateway,4); 
 	eeprom_write_byte  (&ee_enable_dhcp, net_conf_enable_dhcp);
 #endif
+	// note we don't write the mac here.
+}
+
+
+// split out saving the mac address since it shouldn't be changed
+void net_conf_mac_save(void)
+{
+    eeprom_write_block ((const void *)net_conf_eth_addr, (void *)&ee_eth_addr,6);
+}
+
+
+void net_conf_load(void)
+{
+    eeprom_read_block ((void *)net_conf_ip_addr, (const void *)&ee_ip_addr,4);
+    eeprom_read_block ((void *)net_conf_net_mask, (const void *)&ee_net_mask,4);
+    eeprom_read_block ((void *)net_conf_gateway,(const void *)&ee_gateway,4);
+    net_conf_enable_dhcp = eeprom_read_byte(&ee_enable_dhcp);
+
+    // load the mac here
+    eeprom_read_block ((void *)net_conf_eth_addr, (const void *)&ee_eth_addr,6);
 }

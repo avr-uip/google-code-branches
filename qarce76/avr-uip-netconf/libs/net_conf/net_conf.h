@@ -51,7 +51,9 @@ void net_conf_set_mac (uint8_t *new_eth_addr);
 uint8_t net_conf_set_mac_string (char *mac_string);
 void net_conf_set_dhcpc(uint8_t mode);
 uint8_t net_conf_is_dhcpc(void);
-void net_conf_store(void);
+void net_conf_save(void);
+void net_conf_mac_save(void);
+void net_conf_load(void);
 
 
 #endif /*__NET_CONF_H__*/
