@@ -37,6 +37,10 @@
 #include "ds1302.h"
 #endif
 
+#ifdef NETWORK_CMD
+#include "net_conf.h"
+#endif 
+
 #include "shell.h"
 
 #include <string.h>
@@ -64,6 +68,7 @@ parse(register char *str, struct ptentry *t)
   p->pfunc(str);
 }
 /*---------------------------------------------------------------------------*/
+#if 0  // inttostr not used anywhere
 static void
 inttostr(register char *str, unsigned int i)
 {
@@ -79,6 +84,9 @@ inttostr(register char *str, unsigned int i)
   str[3] = ' ';
   str[4] = 0;
 }
+#endif  // inttostr not used anywhere
+
+#ifdef TELNETD_TIME_CMD
 static void
 settime(char *str)
 {
@@ -103,23 +111,86 @@ isotime(char *str)
 */
   shell_output(iso_timestore, "");
 }
+#endif
+
+/*---------------------------------------------------------------------------*/
+#ifdef NETWORK_CMD
+static void
+shell_network(char *str)
+{
+	char *pos = str + sizeof("network");
+	uint8_t is_error = 0;
+
+	shell_output("you said:", pos);
+
+	if (strncmp("set ", pos, 4) == 0)
+	{
+        pos += 4;
+		if (strncmp("ip ", pos, 3) == 0)
+		{
+        	pos += 3;
+				
+		}
+		else if (strncmp("gw ", pos, 3) == 0)
+		{
+        	pos += 3;
+
+		}
+		else if (strncmp("nm ", pos, 3) == 0)
+		{
+        	pos += 3;
+
+		}
+		else if (strncmp("dhcp ", pos, 5) == 0)
+		{
+        	pos += 5
+
+		}
+		else
+		{
+
+		}
+	}
+	else if (strncmp("show", pos, 4) == 0)
+	{
+        pos += 5;
+
+	}
+	else if (strncmp("load", pos, 4) == 0)
+	{
+		net_conf_load();
+	}
+	else if (strncmp("save", pos, 4) == 0)
+	{
+		net_conf_save();
+	}
+	else
+	{
+		shell_output("options: show, set, load, save","");
+	}
+}
+#endif
 /*---------------------------------------------------------------------------*/
 static void
 help(char *str)
 {
+  // TEXT HERE CAN ONLY BE 40 chars / output! based on telnetd.h 
   shell_output("Available commands:", "");
 #ifdef TELNETD_TIME_CMD
-  shell_output("isotime - show the current system time in iso format", "");
-  shell_output("settime - set the current system time", "");
-  shell_output("gettime - get the current system time", "");
-  shell_output("rtcisotime - show the current RTC time in iso format", "");
+  shell_output("isotime - sys time, iso format", "");
+  shell_output("settime - set sys time", "");
+  shell_output("gettime - get sys time", "");
+  shell_output("rtcisotime - show RTC time, iso format", "");
   shell_output("rtcsettime - set the current RTC time", "");
-  shell_output("rtcgettime - set the current RTC time", "");
-  shell_output("rtctosys   - copy the RTC time to the system time", "");
-  shell_output("systortc   - copy the system time to the RTC chip", "");
+  shell_output("rtcgettime - get the current RTC time", "");
+  shell_output("rtctosys   - copy RTC time to sys", "");
+  shell_output("systortc   - copy sys time to RTC", "");
 #endif
-  shell_output("stats   - show network statistics", "");
-  shell_output("conn    - show TCP connections", "");
+#ifdef NETWORK_CMD
+  shell_output("network - get/set network settings", "");
+#endif
+//  shell_output("stats   - show network statistics", "");
+//  shell_output("conn    - show TCP connections", "");
   shell_output("help, ? - show help", "");
   shell_output("exit    - exit shell", "");
 }
@@ -142,6 +213,9 @@ static struct ptentry parsetab[] =
 #ifdef TELNETD_TIME_CMD
    {"time", isotime},
    {"settime", settime},
+#endif
+#ifdef NETWORK_CMD
+   {"network", shell_network},
 #endif
 
    /* Default action */
