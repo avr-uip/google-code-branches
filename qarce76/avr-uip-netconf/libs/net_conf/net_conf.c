@@ -151,8 +151,8 @@ uint8_t network_string_to_byte_array(char *net_string,
 
 			// if nothing was converted to a value
 			// if the index is == to the length we are one byte over the array
-			if (the_end == to_convert) ||
-				(bindex == byte_array_len)
+			if ((the_end == to_convert) ||
+				(bindex == byte_array_len))
 			{
 				// return an error
                 return (1);
@@ -175,6 +175,10 @@ void net_conf_set_ip (uint8_t *new_ip)
     memcpy(net_conf_ip_addr, new_ip, 4);
 }
 
+uint8_t net_conf_get_ip_string (char* ip_string, ip_string_len)
+{
+	dfd
+}
 
 // 
 uint8_t net_conf_set_ip_string (char *ip_string)
@@ -191,6 +195,11 @@ uint8_t *net_conf_get_gw (void)
 void net_conf_set_gw (uint8_t* new_gw)
 {
     memcpy(net_conf_gateway, new_gw, 4);
+}
+
+uint8_t net_conf_get_gw_string (char* gw_string, gw_string_len)
+{
+	dfdf
 }
 
 uint8_t net_conf_set_gw_string (char* gw_string)
@@ -210,6 +219,11 @@ void net_conf_set_nm (uint8_t *new_nm)
     memcpy(net_conf_net_mask, new_nm, 4);
 }
 
+uint8_t net_conf_get_gw_string (char* nm_string, nm_string_len)
+{
+	dfdf
+}
+
 uint8_t net_conf_set_nm_string (char *nm_string)
 {
     return network_string_to_byte_array(nm_string, net_conf_net_mask, 4);
@@ -226,6 +240,11 @@ void net_conf_set_mac (uint8_t *new_eth_addr)
 	memcpy(net_conf_eth_addr, new_eth_addr, 6);
 }
 
+uint8_t net_conf_get_mac_string (char* mac_string, mac_string_len)
+{
+	dfdf
+}
+
 uint8_t net_conf_set_mac_string (char *mac_string)
 {
 	return network_string_to_byte_array(mac_string, net_conf_eth_addr, 6);
@@ -240,6 +259,24 @@ void net_conf_set_dhcpc(uint8_t mode)
         net_conf_enable_dhcp = mode;
 	}
 }
+
+
+uint8_t net_conf_set_dhcpc_string(char *mode)
+{
+	if (strncmp("on", mode, 2) == 0)
+	{
+		net_conf_set_dhcpc(1);
+		return (0);
+	}
+	else if (strncmp("of", mode, 2) == 0)
+	{
+		net_conf_set_dhcpc(0);
+		return (0);
+	}
+
+	return (1);
+}
+
 
 // is the system in dhcp mode
 // 0 == no, 1 == true
@@ -260,6 +297,7 @@ void net_conf_save(void)
 #else
     eeprom_write_block ((const void *)net_conf_ip_addr, (void *)&ee_ip_addr,4);
     eeprom_write_block ((const void *)net_conf_net_mask,(void *)&ee_net_mask,4);
+    eeprom_write_block ((const void *)net_conf_gateway, (void *)&ee_gateway,4); 
     eeprom_write_block ((const void *)net_conf_gateway, (void *)&ee_gateway,4); 
 	eeprom_write_byte  (&ee_enable_dhcp, net_conf_enable_dhcp);
 #endif
