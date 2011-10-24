@@ -103,6 +103,8 @@ typedef unsigned short uip_stats_t;
  */
 #define UIP_CONF_UDP_CONNS		0
 
+#define UIP_REASSEMBLY 0
+
 //Include app configuration
 #include "apps-conf.h"
 

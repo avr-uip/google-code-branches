@@ -115,11 +115,13 @@ isotime(char *str)
 
 /*---------------------------------------------------------------------------*/
 #ifdef NETWORK_CMD
+#define DSTR_BUF 25
 static void
 shell_network(char *str)
 {
 	char *pos = str + sizeof("network");
 	uint8_t is_error = 0;
+	char dstr[DSTR_BUF];
 
 	shell_output("you said:", pos);
 
@@ -129,32 +131,43 @@ shell_network(char *str)
 		if (strncmp("ip ", pos, 3) == 0)
 		{
         	pos += 3;
-				
+			is_error = net_conf_set_ip_string(pos);
 		}
 		else if (strncmp("gw ", pos, 3) == 0)
 		{
         	pos += 3;
-
+shell_output("gw is: ", pos);
+			is_error = net_conf_set_gw_string(pos);
+			dstr[0] = 'A' + is_error;
+			dstr[1] = '\0';
+shell_output("count: ", dstr);
 		}
 		else if (strncmp("nm ", pos, 3) == 0)
 		{
         	pos += 3;
-
+			is_error = net_conf_set_nm_string(pos);
 		}
 		else if (strncmp("dhcp ", pos, 5) == 0)
 		{
-        	pos += 5
-
+        	pos += 5;
+			is_error = net_conf_set_dhcpc_string(pos);
 		}
 		else
 		{
-
+			shell_output("unknown set operation: ", pos);
 		}
 	}
 	else if (strncmp("show", pos, 4) == 0)
 	{
         pos += 5;
-
+		net_conf_get_mac_string(dstr, DSTR_BUF);
+		shell_output("MAC: ", dstr);
+		net_conf_get_ip_string(dstr, DSTR_BUF);
+		shell_output("IP: ", dstr);
+		net_conf_get_nm_string(dstr, DSTR_BUF);
+		shell_output("NM: ", dstr);
+		net_conf_get_gw_string(dstr, DSTR_BUF);
+		shell_output("GW: ", dstr);
 	}
 	else if (strncmp("load", pos, 4) == 0)
 	{
