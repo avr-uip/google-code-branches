@@ -136,11 +136,7 @@ shell_network(char *str)
 		else if (strncmp("gw ", pos, 3) == 0)
 		{
         	pos += 3;
-shell_output("gw is: ", pos);
 			is_error = net_conf_set_gw_string(pos);
-			dstr[0] = 'A' + is_error;
-			dstr[1] = '\0';
-shell_output("count: ", dstr);
 		}
 		else if (strncmp("nm ", pos, 3) == 0)
 		{
