@@ -2,6 +2,10 @@
 #ifndef __GLOBAL_CONF_H__
 #define __GLOBAL_CONF_H__
 
+//#define CONSOLE_SPEED_9600 80
+#define CONSOLE_SPEED_9600 85 
+
+
 //Define frequency
 #define F_CPU 12500000UL
 //Mac adress definition for enc28j60

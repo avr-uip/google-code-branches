@@ -4,6 +4,7 @@
 #include <avr/eeprom.h>
 #include <avr/wdt.h>
 
+#include "global-conf.h"
 #include "timer.h"
 
 #include "uip_arp.h"
@@ -13,6 +14,9 @@
 #include <string.h>
 
 #include "net_conf.h"
+
+//#include "usart.h"
+//#include "uart.h"
 
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
 
@@ -43,6 +47,7 @@ int main(void)
 
 	network_init();
 
+
 	CLKPR = (1<<CLKPCE);	//Change prescaler
 	CLKPR = (1<<CLKPS0);	//Use prescaler 2
 	enc28j60Write(ECOCON, 1 & 0x7);	//Get a 25MHz signal from enc28j60
@@ -68,6 +73,21 @@ int main(void)
 	//simple_httpd_init();
 	telnetd_init();
 
+//	usart_init(CONSOLE_SPEED_9600);
+//	usart_redirect_stdout();
+//
+//	printf("\nThis is a test... ");
+
+/*
+	USART_init(CONSOLE_SPEED_9600);
+	USART_transmit('A');
+	USART_transmit('B');
+	USART_transmit('C');
+	USART_transmit('D');
+
+	sendString("Hello out there\n\r");
+*/
+led_high();
 
 	while(1){
 		uip_len = network_read();
@@ -123,7 +143,8 @@ int main(void)
 #if UIP_CONF_LOGGING == 1
 void uip_log(char *m)
 {
-	sendString(m);
+//	sendString(m);
+	printf("%s", m);
 	//TODO: Get debug information out here somehow, does anybody know a smart way to do that?
 }
 #endif

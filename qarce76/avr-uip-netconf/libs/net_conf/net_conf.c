@@ -10,6 +10,8 @@
 #include "uip_arp.h"
 #include <network.h>
 
+#include <ctype.h>
+
 #ifdef PORTB1
 //Led on tuxgraphics board
 #define led_conf()      DDRB |= (1<<DDB1)
@@ -74,16 +76,24 @@ net_conf_enable_dhcp = 0;
 		net_conf_save();
     }
 
-    // if the mac address in eeprom looks good, use it.
-    if((net_conf_eth_addr[0] != 255) && (net_conf_eth_addr[0] != 0))
+    // if the mac address in eeprom looks bad, use the defaults
+    if(net_conf_eth_addr[0] == 0xff)
     {
-        my_eth_addr.addr[0] = net_conf_eth_addr[0];
-        my_eth_addr.addr[1] = net_conf_eth_addr[1];
-        my_eth_addr.addr[2] = net_conf_eth_addr[2];
-        my_eth_addr.addr[3] = net_conf_eth_addr[3];
-        my_eth_addr.addr[4] = net_conf_eth_addr[4];
-        my_eth_addr.addr[5] = net_conf_eth_addr[5];
-    }
+		net_conf_eth_addr[0] = UIP_ETHADDR0;
+		net_conf_eth_addr[1] = UIP_ETHADDR1;
+		net_conf_eth_addr[2] = UIP_ETHADDR2;
+		net_conf_eth_addr[3] = UIP_ETHADDR3;
+		net_conf_eth_addr[4] = UIP_ETHADDR4;
+		net_conf_eth_addr[5] = UIP_ETHADDR5;
+		net_conf_mac_save();
+	}
+
+	my_eth_addr.addr[0] = net_conf_eth_addr[0];
+	my_eth_addr.addr[1] = net_conf_eth_addr[1];
+	my_eth_addr.addr[2] = net_conf_eth_addr[2];
+	my_eth_addr.addr[3] = net_conf_eth_addr[3];
+	my_eth_addr.addr[4] = net_conf_eth_addr[4];
+	my_eth_addr.addr[5] = net_conf_eth_addr[5];
 
 // this is broken for the moment... 
 //	network_set_MAC(net_conf_eth_addr);
@@ -111,12 +121,26 @@ net_conf_enable_dhcp = 0;
             uip_ipaddr(ipaddr, UIP_IPADDR0, UIP_IPADDR1,
 			                   UIP_IPADDR2, UIP_IPADDR3);
             uip_sethostaddr(ipaddr);
+			net_conf_ip_addr[0] = UIP_IPADDR0;
+			net_conf_ip_addr[1] = UIP_IPADDR1;
+			net_conf_ip_addr[2] = UIP_IPADDR2;
+			net_conf_ip_addr[3] = UIP_IPADDR3;
+
             uip_ipaddr(ipaddr, UIP_DRIPADDR0, UIP_DRIPADDR1,
 			                   UIP_DRIPADDR2, UIP_DRIPADDR3);
             uip_setdraddr(ipaddr);
+			net_conf_gateway[0] = UIP_DRIPADDR0;
+			net_conf_gateway[1] = UIP_DRIPADDR1;
+			net_conf_gateway[2] = UIP_DRIPADDR2;
+			net_conf_gateway[3] = UIP_DRIPADDR3;
+
             uip_ipaddr(ipaddr, UIP_NETMASK0, UIP_NETMASK1,
 			                   UIP_NETMASK2, UIP_NETMASK3);
             uip_setnetmask(ipaddr);
+			net_conf_net_mask[0] = UIP_NETMASK0;
+			net_conf_net_mask[1] = UIP_NETMASK1;
+			net_conf_net_mask[2] = UIP_NETMASK2;
+			net_conf_net_mask[3] = UIP_NETMASK3;
 
 			// update the eeprom with the correct data
 			net_conf_save();
@@ -126,35 +150,34 @@ net_conf_enable_dhcp = 0;
 	return 0;
 }
 
-
 //
 // Take the given string of the format
 // 192.168.1.99 or 00:11:22:33:44:55
 uint8_t network_string_to_byte_array(char *net_string,
-                                     uint8_t byte_array[],
+                                     uint8_t *byte_array,
 									 uint8_t byte_array_len)
 {
     char *to_convert = net_string;
-	char *walk;
 	char *the_end;
+	uint8_t eindex = strlen(net_string);
+	uint8_t windex;
 	uint8_t bindex = 0;
     uint8_t base = 10;
 
-    for (walk = net_string; walk != '\0'; walk++);
+    for (windex = 0; windex != eindex; windex++)
 	{
-        if ((*walk == '.') || ((*walk == ':') && (base = 16)))
+        if ((net_string[windex] == '.') || ((net_string[windex] == ':') && (base = 16)))
 		{
-			*walk = '\0';
+			net_string[windex] = '\0';
             byte_array[bindex] = (uint8_t) strtol(to_convert, &the_end, base);
 			bindex++;
-			to_convert = walk+1;
+			to_convert = &net_string[windex + 1];
 
 			// if nothing was converted to a value
 			// if the index is == to the length we are one byte over the array
 			if ((the_end == to_convert) ||
 				(bindex == byte_array_len))
 			{
-				// return an error
                 return (1);
 			}
 		}
@@ -175,14 +198,17 @@ void net_conf_set_ip (uint8_t *new_ip)
     memcpy(net_conf_ip_addr, new_ip, 4);
 }
 
-uint8_t net_conf_get_ip_string (char* ip_string, ip_string_len)
+int8_t net_conf_get_ip_string (char* ip_string, int8_t ip_string_len)
 {
-	dfd
+	return(snprintf(ip_string, ip_string_len, "%d.%d.%d.%d",
+			net_conf_ip_addr[0], net_conf_ip_addr[1],
+			net_conf_ip_addr[2], net_conf_ip_addr[3]));
 }
 
 // 
 uint8_t net_conf_set_ip_string (char *ip_string)
 {
+    //return network_string_to_byte_array("192.168.2.88", net_conf_ip_addr, 4);    
     return network_string_to_byte_array(ip_string, net_conf_ip_addr, 4);    
 }
 
@@ -197,14 +223,19 @@ void net_conf_set_gw (uint8_t* new_gw)
     memcpy(net_conf_gateway, new_gw, 4);
 }
 
-uint8_t net_conf_get_gw_string (char* gw_string, gw_string_len)
+int8_t net_conf_get_gw_string (char* gw_string, int8_t gw_string_len)
 {
-	dfdf
+	return(snprintf(gw_string, gw_string_len, "%d.%d.%d.%d",
+			net_conf_gateway[0], net_conf_gateway[1],
+			net_conf_gateway[2], net_conf_gateway[3]));
 }
 
 uint8_t net_conf_set_gw_string (char* gw_string)
 {
-    return network_string_to_byte_array(gw_string, net_conf_gateway, 4);
+    //return network_string_to_byte_array(gw_string, net_conf_gateway, 4);
+   return network_string_to_byte_array(gw_string, net_conf_gateway, 4);
+//	return (strlen(gw_string));
+//	net_conf_gateway[3] = 4;
 }
 
 
@@ -219,9 +250,11 @@ void net_conf_set_nm (uint8_t *new_nm)
     memcpy(net_conf_net_mask, new_nm, 4);
 }
 
-uint8_t net_conf_get_gw_string (char* nm_string, nm_string_len)
+int8_t net_conf_get_nm_string (char* nm_string, int8_t nm_string_len)
 {
-	dfdf
+	return(snprintf(nm_string, nm_string_len, "%d.%d.%d.%d",
+			net_conf_net_mask[0], net_conf_net_mask[1],
+			net_conf_net_mask[2], net_conf_net_mask[3]));
 }
 
 uint8_t net_conf_set_nm_string (char *nm_string)
@@ -240,9 +273,12 @@ void net_conf_set_mac (uint8_t *new_eth_addr)
 	memcpy(net_conf_eth_addr, new_eth_addr, 6);
 }
 
-uint8_t net_conf_get_mac_string (char* mac_string, mac_string_len)
+int8_t net_conf_get_mac_string (char* mac_string, int8_t mac_string_len)
 {
-	dfdf
+	return(snprintf(mac_string, mac_string_len, "%02x:%02x:%02x:%02x:%02x:%02x",
+			net_conf_eth_addr[0], net_conf_eth_addr[1],
+			net_conf_eth_addr[2], net_conf_eth_addr[3],
+			net_conf_eth_addr[4], net_conf_eth_addr[5]));
 }
 
 uint8_t net_conf_set_mac_string (char *mac_string)
