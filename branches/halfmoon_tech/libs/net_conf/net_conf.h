@@ -24,23 +24,6 @@
 #define UIP_DRIPADDR2 2
 #define UIP_DRIPADDR3 1
 
-#ifndef eeprom_fixed
-	#define serial_start
-	#define serial_len
-	#define mac_start
-	#define mac_len
-	#define ip_address_start
-	#define ip_address_len
-	#define nm_address_start
-	#define nm_address_len
-	#define gw_address_start
-	#define gw_address_len
-	#define dns_address_start
-	#define dns_address_len
-	#define dhcp_enabled_start
-#endif
-
-
 #include "uip.h"
 //
 // ** do this include instead of all of uip.h **
