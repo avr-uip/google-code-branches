@@ -12,6 +12,9 @@
 //#include "a2d.h"
 #include "uart-t.h"
 
+#ifdef eeprom_fixed
+	//#include "eeprom_addr.h"
+#endif
 
 
 #include "uip_arp.h"
@@ -25,14 +28,57 @@
 #define NUM_TEMP_SENSORS 8
 #define NUM_TEMP_READINGS 16
 
+
 // this may need to be a 32 bit number instead
 uint16_t temp_sensors[NUM_TEMP_SENSORS];
+
+//uint8_t serial_number[serial_len];
+//uint8_t mac_address[mac_len];
+
+//uint8_t dhcp_enabled[1];
+
+//uint8_t ip_address[ip_address_len];
+//uint8_t nm_address[nm_address_len];
+//uint8_t gw_address[gw_address_len];
+//uint8_t dns_address[dns_address_len];
+
+//void load_config(void){
+//	eeprom_read_block ((void *)serial_number, (const void *)serial_start,serial_len);
+//	eeprom_read_block ((void *)mac_address, (const void *)mac_start,mac_len);
+//	eeprom_read_block ((void *)dhcp_enabled, (const void *)dhcp_enabled_start,1);
+//	eeprom_read_block ((void *)ip_address, (const void *)ip_address_start,ip_address_len);
+//	eeprom_read_block ((void *)nm_address, (const void *)nm_address_start,nm_address_len);
+//	eeprom_read_block ((void *)gw_address, (const void *)gw_address_start,gw_address_len);
+//	eeprom_read_block ((void *)dns_address, (const void *)dns_address_start,dns_address_len);
+//}
+
+/*
+void read_sensors(void){
+	extern int sensor0, sensor1, sensor2, sensor3, sensor4, sensor5, sensor6, sensor7;
+
+	int ii, iii, sample,temp;
+	for(iii=0;iii<8;iii++){
+		sample=0;
+		for(ii=0;ii<16;ii++){
+			//sample += a2dConvert10bit(iii);
+		}
+		temp = (sample / 16);
+		//temp = convert_adc2far(temp);
+		if(iii==0){sensor0 = temp;}
+		else if(iii==1){sensor1 = temp;}
+		else if(iii==2){sensor2 = temp;}
+		else if(iii==3){sensor3 = temp;}
+		else if(iii==4){sensor4 = temp;}
+		else if(iii==5){sensor5 = temp;}
+		else if(iii==6){sensor6 = temp;}
+		else if(iii==7){sensor7 = temp;}
+	}
 
 int convert_adc2far(int adc_data){
     float ttt;
     ttt = (adc_data * .0048828125 * 100);
     ttt = ttt * 1.8;
-    return (ttt + 32);
+   return (ttt + 32);
 }
 
 void read_sensors(void)
@@ -51,12 +97,12 @@ void read_sensors(void)
         temp_sensors[sensor_index] = sample;
     }
 }
+*/
 
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
 struct timer dhcp_timer;
 
 int bob = 986;
-
 
 int main(void)
 {
@@ -64,6 +110,7 @@ int main(void)
     MCUSR &= ~(1 << WDRF);
     wdt_disable();
 
+	//load_config();
 
 //led_conf();
 
@@ -111,14 +158,37 @@ int main(void)
 	USART_Init(95);
 	sendString("\E[H\E[J");
 	sendString("Booting Biomass Ethernet\r\n");
-
+	/*
+	char bb[100];
+	sprintf(bb, "Serial Number: %d%d%d%d%d%d%d%d%d%d\r\n", serial_number[0],serial_number[1],serial_number[2],serial_number[3],serial_number[4],serial_number[5],serial_number[6],serial_number[7],serial_number[8],serial_number[9]); 
+	sendString(bb);
+	memset(bb, 0,  sizeof(bb));
+	sprintf(bb, "MAC Address: %02X:%02X:%02X:%02X:%02X:%02X\r\n", mac_address[0],mac_address[1],mac_address[2],mac_address[3],mac_address[4],mac_address[5]); 
+	sendString(bb);
+	memset(bb, 0,  sizeof(bb));
+	sprintf(bb, "USE DHCP: %d\r\n", dhcp_enabled[0]); 
+	sendString(bb);
+	memset(bb, 0,  sizeof(bb));
+	sprintf(bb, "IP  Address: %d.%d.%d.%d\r\n", ip_address[0],ip_address[1],ip_address[2],ip_address[3]); 
+	sendString(bb);
+	memset(bb, 0,  sizeof(bb));
+	sprintf(bb, "NM  Address: %d.%d.%d.%d\r\n", nm_address[0],nm_address[1],nm_address[2],nm_address[3]); 
+	sendString(bb);
+	memset(bb, 0,  sizeof(bb));
+	sprintf(bb, "GW  Address: %d.%d.%d.%d\r\n", gw_address[0],gw_address[1],gw_address[2],gw_address[3]); 
+	sendString(bb);
+	memset(bb, 0,  sizeof(bb));
+	sprintf(bb, "DNS Address: %d.%d.%d.%d\r\n", dns_address[0],dns_address[1],dns_address[2],dns_address[3]); 
+	sendString(bb);
+	memset(bb, 0,  sizeof(bb));
+	*/
 	while(1)
     {
         
 		if(timer_expired(&sensor_timer))
         {
             timer_reset(&sensor_timer);
-			read_sensors();
+			//read_sensors();
         }
 
 		uip_len = network_read();

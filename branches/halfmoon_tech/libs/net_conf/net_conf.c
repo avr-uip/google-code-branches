@@ -12,6 +12,9 @@
 
 #include <ctype.h>
 
+#ifdef eeprom_fixed
+	#include "eeprom_addr.h"
+#endif
 
 // TCP/IP parameters in data memory
 uint8_t net_conf_enable_dhcp;
@@ -376,15 +379,30 @@ void net_conf_save(void)
 // update functions write if data is different
 #if defined(eeprom_update_block)
     // added to avr-lib @ version 1.6.7
-    eeprom_update_block ((const void *)net_conf_ip_addr, (void *)NET_CONF_EEMEM_IP_ADDR,4);
-    eeprom_update_block ((const void *)net_conf_net_mask,(void *)NET_CONF_EEMEM_NET_MASK,4);
-    eeprom_update_block ((const void *)net_conf_gateway, (void *)NET_CONF_EEMEM_GATEWAY,4); 
-    eeprom_update_byte  ((uint8_t *)NET_CONF_EEMEM_ENABLE_DHCP, net_conf_enable_dhcp);
+	#ifdef eeprom_fixed
+		eeprom_update_block ((const void *)net_conf_ip_addr, (void *)ip_address_start,ip_address_len);
+		eeprom_update_block ((const void *)net_conf_net_mask,(void *)nm_address_start,nm_address_len);
+		eeprom_update_block ((const void *)net_conf_gateway, (void *)gw_address_start,gw_address_len); 
+		eeprom_update_byte  ((const void *)dhcp_enabled_start, net_conf_enable_dhcp);
+	#else
+		eeprom_update_block ((const void *)net_conf_ip_addr, (void *)NET_CONF_EEMEM_IP_ADDR,4);
+		eeprom_update_block ((const void *)net_conf_net_mask,(void *)NET_CONF_EEMEM_NET_MASK,4);
+		eeprom_update_block ((const void *)net_conf_gateway, (void *)NET_CONF_EEMEM_GATEWAY,4); 
+		eeprom_update_byte  ((uint8_t *)NET_CONF_EEMEM_ENABLE_DHCP, net_conf_enable_dhcp);
+	#endif
+
 #else
-    eeprom_write_block ((const void *)net_conf_ip_addr, (void *)NET_CONF_EEMEM_IP_ADDR,4);
-    eeprom_write_block ((const void *)net_conf_net_mask,(void *)NET_CONF_EEMEM_NET_MASK,4);
-    eeprom_write_block ((const void *)net_conf_gateway, (void *)NET_CONF_EEMEM_GATEWAY,4); 
-    eeprom_write_byte  ((uint8_t *)NET_CONF_EEMEM_ENABLE_DHCP, net_conf_enable_dhcp);
+	#ifdef eeprom_fixed
+		eeprom_write_block ((const void *)net_conf_ip_addr, (const void *)ip_address_start,ip_address_len);
+		eeprom_write_block ((const void *)net_conf_net_mask,(const void *)nm_address_start,nm_address_len);
+		eeprom_write_block ((const void *)net_conf_gateway, (const void *)gw_address_start,gw_address_len); 
+		eeprom_write_byte  ((const void *)dhcp_enabled_start, net_conf_enable_dhcp);
+	#else
+		eeprom_write_block ((const void *)net_conf_ip_addr, (const void *)ip_address_start,ip_address_len);
+		eeprom_write_block ((const void *)net_conf_net_mask,(const void *)nm_address_start,nm_address_len);
+		eeprom_write_block ((const void *)net_conf_gateway, (const void *)gw_address_start,gw_address_len); 
+		eeprom_write_byte  ((uint8_t *)NET_CONF_EEMEM_ENABLE_DHCP, net_conf_enable_dhcp);
+	#endif
 #endif
 	// note we don't write the mac here.
 }
@@ -393,13 +411,22 @@ void net_conf_save(void)
 // split out saving the mac address since it shouldn't be changed
 void net_conf_mac_save(void)
 {
-    eeprom_write_block ((const void *)net_conf_eth_addr, (void *)NET_CONF_EEMEM_ETH_ADDR,6);
+	#ifndef eeprom_fixed
+		eeprom_write_block ((const void *)net_conf_eth_addr, (void *)NET_CONF_EEMEM_ETH_ADDR,6);
+	#endif
 }
 
 
 void net_conf_load(void)
 {
-    eeprom_read_block ((void *)net_conf_ip_addr, (const void *)NET_CONF_EEMEM_IP_ADDR,4);
+#ifdef eeprom_fixed
+	eeprom_read_block ((void *)net_conf_eth_addr, 0x000A, mac_len);
+	net_conf_enable_dhcp = eeprom_read_byte((const void *)dhcp_enabled_start);
+	eeprom_read_block ((void *)net_conf_ip_addr, (const void *)ip_address_start,ip_address_len);
+	eeprom_read_block ((void *)net_conf_net_mask, (const void *)nm_address_start,nm_address_len);
+	eeprom_read_block ((void *)net_conf_gateway, (const void *)gw_address_start,gw_address_len);
+#else
+	eeprom_read_block ((void *)net_conf_ip_addr, (const void *)NET_CONF_EEMEM_IP_ADDR,4);
     eeprom_read_block ((void *)net_conf_net_mask, (const void *)NET_CONF_EEMEM_NET_MASK,4);
     eeprom_read_block ((void *)net_conf_gateway,(const void *)NET_CONF_EEMEM_GATEWAY,4);
     //net_conf_enable_dhcp = eeprom_read_byte(&eemem_enable_dhcp);
@@ -407,6 +434,7 @@ void net_conf_load(void)
 
     // load the mac here
     eeprom_read_block ((void *)net_conf_eth_addr, (const void *)NET_CONF_EEMEM_ETH_ADDR,6);
+#endif
 }
 
 /*---- START DHCP directly supported in net_conf ----*/
