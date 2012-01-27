@@ -14,7 +14,6 @@
 
 #include "eeprom_addr.h"
 
-
 #include "uip_arp.h"
 #include "network.h"
 #include "enc28j60.h"
