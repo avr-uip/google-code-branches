@@ -12,9 +12,7 @@
 //#include "a2d.h"
 #include "uart-t.h"
 
-#ifdef eeprom_fixed
-	//#include "eeprom_addr.h"
-#endif
+#include "eeprom_addr.h"
 
 
 #include "uip_arp.h"

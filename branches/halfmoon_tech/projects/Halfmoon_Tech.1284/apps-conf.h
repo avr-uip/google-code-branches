@@ -5,8 +5,6 @@
 //
 #define PORT_APP_MAPPER 1
 
-#define eeprom_fixed
-
 //#include "smtp.h"
 //#include "hello-world.h"
 //#include "simple-httpd.h"

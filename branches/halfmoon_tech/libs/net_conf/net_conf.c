@@ -12,10 +12,6 @@
 
 #include <ctype.h>
 
-#ifdef eeprom_fixed
-	#include "eeprom_addr.h"
-#endif
-
 // TCP/IP parameters in data memory
 uint8_t net_conf_enable_dhcp;
 uint8_t net_conf_eth_addr[6];
