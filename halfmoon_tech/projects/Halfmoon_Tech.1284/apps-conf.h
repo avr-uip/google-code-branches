@@ -31,4 +31,6 @@
 	#include "port_app_mapper.h"
 #endif
 
+//#include "eeprom_addr.h"
+
 #endif /*__APPS_CONF_H__*/
