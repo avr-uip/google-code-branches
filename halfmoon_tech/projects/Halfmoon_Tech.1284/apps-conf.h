@@ -2,8 +2,10 @@
 #define __APPS_CONF_H__
 
 //Here we include the header file for the application(s) we use in our project.
-
+//
 #define PORT_APP_MAPPER 1
+
+#define eeprom_fixed
 
 //#include "smtp.h"
 //#include "hello-world.h"
