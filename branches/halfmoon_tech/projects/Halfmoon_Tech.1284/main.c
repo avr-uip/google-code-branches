@@ -41,13 +41,17 @@ uint8_t dns_address[dns_address_len];
 
 void load_config(void){
 	eeprom_read_block ((void *)serial_number, (const void *)serial_start,serial_len);
-	eeprom_read_block ((void *)mac_address, (const void *)mac_start,mac_len);
+/*	eeprom_read_block ((void *)mac_address, (const void *)mac_start,mac_len);
 	eeprom_read_block ((void *)dhcp_enabled, (const void *)dhcp_enabled_start,1);
 	eeprom_read_block ((void *)ip_address, (const void *)ip_address_start,ip_address_len);
 	eeprom_read_block ((void *)nm_address, (const void *)nm_address_start,nm_address_len);
 	eeprom_read_block ((void *)gw_address, (const void *)gw_address_start,gw_address_len);
+*/
+// I still need to add the dns support
 	eeprom_read_block ((void *)dns_address, (const void *)dns_address_start,dns_address_len);
+
 }
+
 
 /*
 void read_sensors(void){
@@ -160,21 +164,26 @@ int main(void)
 	sprintf(bb, "Serial Number: %d%d%d%d%d%d%d%d%d%d\r\n", serial_number[0],serial_number[1],serial_number[2],serial_number[3],serial_number[4],serial_number[5],serial_number[6],serial_number[7],serial_number[8],serial_number[9]); 
 	sendString(bb);
 	memset(bb, 0,  sizeof(bb));
-	sprintf(bb, "MAC Address: %02X:%02X:%02X:%02X:%02X:%02X\r\n", mac_address[0],mac_address[1],mac_address[2],mac_address[3],mac_address[4],mac_address[5]); 
+        sendString("MAC Address: ");
+        net_conf_get_mac_string (bb, 100);
 	sendString(bb);
 	memset(bb, 0,  sizeof(bb));
-	sprintf(bb, "USE DHCP: %d\r\n", dhcp_enabled[0]); 
+	sprintf(bb, "USE DHCP: %d\r\n", net_conf_is_dhcpc()); 
 	sendString(bb);
 	memset(bb, 0,  sizeof(bb));
-	sprintf(bb, "IP  Address: %d.%d.%d.%d\r\n", ip_address[0],ip_address[1],ip_address[2],ip_address[3]); 
+	sprintf(bb, "IP  Address: "); 
+        net_conf_get_ip_string(bb, 100);
 	sendString(bb);
 	memset(bb, 0,  sizeof(bb));
-	sprintf(bb, "NM  Address: %d.%d.%d.%d\r\n", nm_address[0],nm_address[1],nm_address[2],nm_address[3]); 
+	sprintf(bb, "NM  Address: "); 
+        net_conf_get_nm_string(bb, 100);
 	sendString(bb);
 	memset(bb, 0,  sizeof(bb));
-	sprintf(bb, "GW  Address: %d.%d.%d.%d\r\n", gw_address[0],gw_address[1],gw_address[2],gw_address[3]); 
+	sprintf(bb, "GW  Address: "); 
+        net_conf_get_gw_string(bb, 100);
 	sendString(bb);
 	memset(bb, 0,  sizeof(bb));
+// this one I still need to implement... 
 	sprintf(bb, "DNS Address: %d.%d.%d.%d\r\n", dns_address[0],dns_address[1],dns_address[2],dns_address[3]); 
 	sendString(bb);
 	memset(bb, 0,  sizeof(bb));
