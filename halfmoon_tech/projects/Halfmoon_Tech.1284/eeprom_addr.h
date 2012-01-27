@@ -1,3 +1,6 @@
+#ifndef __EEPROM_ADDR_H__
+#define __EEPROM_ADDR_H__
+
 #define eeprom_fixed
 
 #define serial_start 0x0000
@@ -20,3 +23,4 @@
 
 #define dhcp_enabled_start 0x0020
 
+#endif /*__EEPROM_ADDR_H__*/

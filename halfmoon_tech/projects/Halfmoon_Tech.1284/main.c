@@ -29,25 +29,25 @@
 // this may need to be a 32 bit number instead
 uint16_t temp_sensors[NUM_TEMP_SENSORS];
 
-//uint8_t serial_number[serial_len];
-//uint8_t mac_address[mac_len];
+uint8_t serial_number[serial_len];
+uint8_t mac_address[mac_len];
 
-//uint8_t dhcp_enabled[1];
+uint8_t dhcp_enabled[1];
 
-//uint8_t ip_address[ip_address_len];
-//uint8_t nm_address[nm_address_len];
-//uint8_t gw_address[gw_address_len];
-//uint8_t dns_address[dns_address_len];
+uint8_t ip_address[ip_address_len];
+uint8_t nm_address[nm_address_len];
+uint8_t gw_address[gw_address_len];
+uint8_t dns_address[dns_address_len];
 
-//void load_config(void){
-//	eeprom_read_block ((void *)serial_number, (const void *)serial_start,serial_len);
-//	eeprom_read_block ((void *)mac_address, (const void *)mac_start,mac_len);
-//	eeprom_read_block ((void *)dhcp_enabled, (const void *)dhcp_enabled_start,1);
-//	eeprom_read_block ((void *)ip_address, (const void *)ip_address_start,ip_address_len);
-//	eeprom_read_block ((void *)nm_address, (const void *)nm_address_start,nm_address_len);
-//	eeprom_read_block ((void *)gw_address, (const void *)gw_address_start,gw_address_len);
-//	eeprom_read_block ((void *)dns_address, (const void *)dns_address_start,dns_address_len);
-//}
+void load_config(void){
+	eeprom_read_block ((void *)serial_number, (const void *)serial_start,serial_len);
+	eeprom_read_block ((void *)mac_address, (const void *)mac_start,mac_len);
+	eeprom_read_block ((void *)dhcp_enabled, (const void *)dhcp_enabled_start,1);
+	eeprom_read_block ((void *)ip_address, (const void *)ip_address_start,ip_address_len);
+	eeprom_read_block ((void *)nm_address, (const void *)nm_address_start,nm_address_len);
+	eeprom_read_block ((void *)gw_address, (const void *)gw_address_start,gw_address_len);
+	eeprom_read_block ((void *)dns_address, (const void *)dns_address_start,dns_address_len);
+}
 
 /*
 void read_sensors(void){
@@ -107,7 +107,7 @@ int main(void)
     MCUSR &= ~(1 << WDRF);
     wdt_disable();
 
-	//load_config();
+	load_config();
 
 //led_conf();
 
@@ -155,7 +155,7 @@ int main(void)
 	USART_Init(95);
 	sendString("\E[H\E[J");
 	sendString("Booting Biomass Ethernet\r\n");
-	/*
+
 	char bb[100];
 	sprintf(bb, "Serial Number: %d%d%d%d%d%d%d%d%d%d\r\n", serial_number[0],serial_number[1],serial_number[2],serial_number[3],serial_number[4],serial_number[5],serial_number[6],serial_number[7],serial_number[8],serial_number[9]); 
 	sendString(bb);
@@ -178,7 +178,7 @@ int main(void)
 	sprintf(bb, "DNS Address: %d.%d.%d.%d\r\n", dns_address[0],dns_address[1],dns_address[2],dns_address[3]); 
 	sendString(bb);
 	memset(bb, 0,  sizeof(bb));
-	*/
+
 	while(1)
     {
         

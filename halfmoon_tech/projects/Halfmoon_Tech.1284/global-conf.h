@@ -9,7 +9,6 @@
 //Define frequency
 #define F_CPU 14745600UL
 
-
 //Include uip.h gives all the uip configurations in uip-conf.h
 #include "uip.h"
 
